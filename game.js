@@ -1,3 +1,5 @@
+// part of this code is based on javidx9's video https://www.youtube.com/watch?v=8OK8_tHeCIA
+
 import getControls from "./controls.js";
 
 function rand(min, max) {
