@@ -106,6 +106,8 @@ export default class Game {
   }
   clear() {
     this.ctx.clearRect(0, 0, this.width, this.height);
+    this.ctx.fillStyle = "#000000";
+    this.ctx.fillRect(0, 0, this.width, this.height);
   }
   collide(x, y, rotation) {
     const { tetrimino } = this.player;
@@ -260,19 +262,19 @@ export default class Game {
     }
   }
   renderGameOver() {
-    this.ctx.fillStyle = "#000000";
+    this.ctx.fillStyle = "#ffffff";
     this.ctx.font = "20px Gameplay";
     this.ctx.fillText("GAME OVER", this.tetrisWidth / 2 - 60, this.height / 2);
   }
   renderPaused() {
-    this.ctx.fillStyle = "#000000";
+    this.ctx.fillStyle = "#ffffff";
     this.ctx.font = "20px Gameplay";
     this.ctx.fillText("PAUSED", this.tetrisWidth / 2 - 40, this.height / 2);
   }
   renderScore() {
     const x = this.tetrisWidth + 30;
     const y = 35;
-    this.ctx.fillStyle = "#000000";
+    this.ctx.fillStyle = "#ffffff";
     this.ctx.font = "14px Gameplay";
     this.ctx.fillText("SCORE", x, y);
     this.ctx.fillText(this.score.toString().padStart(8, "0"), x, y + 20);
@@ -280,7 +282,7 @@ export default class Game {
   renderNextTetrimino() {
     const x = this.tetrisWidth + 30;
     const y = 90;
-    this.ctx.fillStyle = "#000000";
+    this.ctx.fillStyle = "#ffffff";
     this.ctx.font = "14px Gameplay";
     this.ctx.fillText("Next", x, y);
 
