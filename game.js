@@ -124,8 +124,8 @@ export default class Game {
       }
     }
   }
-  removeFilledLines() {
-    let removedLines = 0;
+  removeFilledRows() {
+    let rowsToRemove = [];
     nextline: for (let row = this.rows - 2; row >= 0; row--) {
       for (let col = this.cols - 1; col >= 0; col--) {
         if (this.board[row * this.cols + col] === 0) {
@@ -133,21 +133,37 @@ export default class Game {
         }
       }
 
-      removedLines++;
-      // The current row should be removed
-      this.board.splice(row * this.cols, this.cols);
-
-      // Prepend a new line at the beginning
-      for (let col = 0; col < this.cols; col++) {
-        if (col === 0 || col === this.cols - 1) {
-          this.board.unshift(1);
-        } else {
-          this.board.unshift(0);
-        }
-      }
+      rowsToRemove.push(row);
     }
-    if (removedLines) {
-      this.score += 2 ** removedLines * 10;
+
+    const rowsToRemoveCount = rowsToRemove.length;
+
+    if (rowsToRemoveCount) {
+      this.state = "removing";
+      let row;
+      let time = 0;
+
+      while ((row = rowsToRemove.shift())) {
+        const r = row;
+        time += 100;
+        setTimeout(() => {
+          // The current row should be removed
+          this.board.splice(r * this.cols, this.cols);
+
+          // Prepend a new line at the beginning
+          for (let col = 0; col < this.cols; col++) {
+            if (col === 0 || col === this.cols - 1) {
+              this.board.unshift(1);
+            } else {
+              this.board.unshift(0);
+            }
+          }
+        }, time);
+      }
+      setTimeout(() => {
+        this.state = "playing";
+        this.score += 2 ** rowsToRemoveCount * 10;
+      }, time);
     }
   }
   initialState() {
@@ -163,7 +179,7 @@ export default class Game {
     const controls = getControls();
 
     if (this.state === "playing") {
-      this.removeFilledLines();
+      this.removeFilledRows();
 
       if (this.collide(player.x, player.y, player.rotation)) {
         this.state = "gameover";
@@ -177,7 +193,7 @@ export default class Game {
         controls.down ||
         controls.rotate
       ) {
-        if (this.holdThreshold % 5 === 0) {
+        if (this.holdThreshold % 8 === 0) {
           if (controls.left) {
             if (!this.collide(player.x - 1, player.y, player.rotation)) {
               player.x--;
@@ -186,22 +202,26 @@ export default class Game {
             if (!this.collide(player.x + 1, player.y, player.rotation)) {
               player.x++;
             }
-          } else if (controls.down) {
-            if (this.collide(player.x, player.y + 1, player.rotation)) {
-              this.lockTetrimino();
-              this.newTetrimino();
-            } else {
-              player.y++;
-            }
           }
         }
-        if (this.holdThreshold % 10 === 0) {
-          if (controls.rotate) {
-            if (!this.collide(player.x, player.y, player.rotation + 1)) {
-              player.rotation++;
-            }
+
+        if (
+          this.holdThreshold % 20 === 0 &&
+          controls.rotate &&
+          !this.collide(player.x, player.y, player.rotation + 1)
+        ) {
+          player.rotation++;
+        }
+
+        if (this.holdThreshold % 4 === 0 && controls.down) {
+          if (this.collide(player.x, player.y + 1, player.rotation)) {
+            this.lockTetrimino();
+            this.newTetrimino();
+          } else {
+            player.y++;
           }
         }
+
         this.holdThreshold++;
       }
 
@@ -216,7 +236,7 @@ export default class Game {
       }
 
       this.ticks++;
-      if (this.ticks % 30 === 0) {
+      if (!controls.down && this.ticks % 30 === 0) {
         if (this.collide(player.x, player.y + 1, player.rotation)) {
           this.lockTetrimino();
           this.newTetrimino();
@@ -233,6 +253,7 @@ export default class Game {
         this.state = "playing";
       }
     }
+
     this.prevControls = controls;
   }
   getTetriminoIndex(col, row, rotation) {
