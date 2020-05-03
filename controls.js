@@ -3,6 +3,7 @@ const controlMappings = {
   ArrowRight: "right",
   ArrowDown: "down",
   " ": "rotate",
+  Enter: "start",
 };
 const controls = {};
 
